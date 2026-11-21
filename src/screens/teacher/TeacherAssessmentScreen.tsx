@@ -17,6 +17,7 @@ interface StudentRow {
   admission_number: string;
   ca_score: string;
   exam_score: string;
+  score_status?: 'present' | 'absent' | 'exempted';
 }
 
 export const TeacherAssessmentScreen: React.FC = () => {
@@ -28,11 +29,11 @@ export const TeacherAssessmentScreen: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [students, setStudents] = useState<StudentRow[]>([
-    { student_id: '1', name: 'Chidi Emeka Okonkwo', admission_number: 'AHC/2026/0001', ca_score: '18', exam_score: '54' },
-    { student_id: '2', name: 'Amina Zainab Danjuma', admission_number: 'AHC/2026/0002', ca_score: '19', exam_score: '57' },
-    { student_id: '3', name: 'Kehinde Adeleke', admission_number: 'AHC/2026/0101', ca_score: '17', exam_score: '52' },
-    { student_id: '4', name: 'Babajide Fashola', admission_number: 'AHC/2026/0104', ca_score: '15', exam_score: '48' },
-    { student_id: '5', name: 'Chioma Okeke', admission_number: 'AHC/2026/0105', ca_score: '16', exam_score: '50' },
+    { student_id: '1', name: 'Chidi Emeka Okonkwo', admission_number: 'AHC/2026/0001', ca_score: '18', exam_score: '54', score_status: 'present' },
+    { student_id: '2', name: 'Amina Zainab Danjuma', admission_number: 'AHC/2026/0002', ca_score: '19', exam_score: '57', score_status: 'present' },
+    { student_id: '3', name: 'Kehinde Adeleke', admission_number: 'AHC/2026/0101', ca_score: '17', exam_score: '52', score_status: 'present' },
+    { student_id: '4', name: 'Babajide Fashola', admission_number: 'AHC/2026/0104', ca_score: '15', exam_score: '48', score_status: 'present' },
+    { student_id: '5', name: 'Chioma Okeke', admission_number: 'AHC/2026/0105', ca_score: '16', exam_score: '50', score_status: 'present' },
   ]);
 
   const updateScore = (id: string, field: 'ca_score' | 'exam_score', val: string) => {
@@ -44,7 +45,17 @@ export const TeacherAssessmentScreen: React.FC = () => {
     setSaveSuccess(false);
   };
 
-  const calculateGrade = (caStr: string, examStr: string) => {
+  const setStatus = (id: string, status: 'present' | 'absent' | 'exempted') => {
+    setStudents((prev) =>
+      prev.map((s) => (s.student_id === id ? { ...s, score_status: status } : s))
+    );
+    setSaveSuccess(false);
+  };
+
+  const calculateGrade = (caStr: string, examStr: string, status?: string) => {
+    if (status === 'absent') return { grade: 'ABS', color: colors.danger };
+    if (status === 'exempted') return { grade: 'EXM', color: colors.textMuted };
+
     const ca = parseFloat(caStr) || 0;
     const exam = parseFloat(examStr) || 0;
     const total = ca + exam;
@@ -66,8 +77,9 @@ export const TeacherAssessmentScreen: React.FC = () => {
         scores: students.map((s) => ({
           student_id: s.student_id,
           component_name: 'Continuous Assessment 1',
-          score: parseFloat(s.ca_score) || 0,
+          score: s.score_status === 'absent' ? 0 : (parseFloat(s.ca_score) || 0),
           max_score: 20,
+          score_status: s.score_status || 'present',
         })),
       };
 
@@ -120,10 +132,12 @@ export const TeacherAssessmentScreen: React.FC = () => {
         </View>
 
         {students.map((student, idx) => {
-          const ca = parseFloat(student.ca_score) || 0;
-          const exam = parseFloat(student.exam_score) || 0;
-          const total = ca + exam;
-          const { grade, color: gradeColor } = calculateGrade(student.ca_score, student.exam_score);
+          const isAbsent = student.score_status === 'absent';
+          const isExempted = student.score_status === 'exempted';
+          const ca = isAbsent ? 0 : (parseFloat(student.ca_score) || 0);
+          const exam = isAbsent ? 0 : (parseFloat(student.exam_score) || 0);
+          const total = isExempted ? '-' : (ca + exam);
+          const { grade, color: gradeColor } = calculateGrade(student.ca_score, student.exam_score, student.score_status);
 
           return (
             <View
@@ -137,28 +151,44 @@ export const TeacherAssessmentScreen: React.FC = () => {
                 <Text style={[styles.studentName, { color: colors.textPrimary }]} numberOfLines={1}>
                   {student.name}
                 </Text>
-                <Text style={[styles.studentAdm, { color: colors.textMuted }]}>{student.admission_number}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 4 }}>
+                  <Text style={[styles.studentAdm, { color: colors.textMuted }]}>{student.admission_number}</Text>
+                  <TouchableOpacity
+                    onPress={() => setStatus(student.student_id, isAbsent ? 'present' : 'absent')}
+                    style={{ paddingHorizontal: 4, paddingVertical: 1, borderRadius: 3, backgroundColor: isAbsent ? colors.danger : colors.surfaceHighlight }}
+                  >
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: isAbsent ? '#FFFFFF' : colors.textMuted }}>{isAbsent ? 'ABS' : 'PRS'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setStatus(student.student_id, isExempted ? 'present' : 'exempted')}
+                    style={{ paddingHorizontal: 4, paddingVertical: 1, borderRadius: 3, backgroundColor: isExempted ? colors.warning : colors.surfaceHighlight }}
+                  >
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: isExempted ? '#FFFFFF' : colors.textMuted }}>{isExempted ? 'EXM' : 'OPT'}</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* CA Input */}
               <View style={styles.tdInput}>
                 <TextInput
-                  style={[styles.scoreBox, { color: colors.textPrimary, borderColor: colors.border, backgroundColor: colors.surfaceHighlight }]}
-                  value={student.ca_score}
+                  style={[styles.scoreBox, { color: colors.textPrimary, borderColor: colors.border, backgroundColor: isAbsent || isExempted ? colors.borderLight : colors.surfaceHighlight }]}
+                  value={isAbsent ? '0' : (isExempted ? '-' : student.ca_score)}
                   onChangeText={(val) => updateScore(student.student_id, 'ca_score', val)}
                   keyboardType="number-pad"
                   maxLength={2}
+                  editable={!isAbsent && !isExempted}
                 />
               </View>
 
               {/* Exam Input */}
               <View style={styles.tdInput}>
                 <TextInput
-                  style={[styles.scoreBox, { color: colors.textPrimary, borderColor: colors.border, backgroundColor: colors.surfaceHighlight }]}
-                  value={student.exam_score}
+                  style={[styles.scoreBox, { color: colors.textPrimary, borderColor: colors.border, backgroundColor: isAbsent || isExempted ? colors.borderLight : colors.surfaceHighlight }]}
+                  value={isAbsent ? '0' : (isExempted ? '-' : student.exam_score)}
                   onChangeText={(val) => updateScore(student.student_id, 'exam_score', val)}
                   keyboardType="number-pad"
                   maxLength={2}
+                  editable={!isAbsent && !isExempted}
                 />
               </View>
 

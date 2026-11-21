@@ -13,6 +13,7 @@ import { ParentAttendanceScreen } from './src/screens/parent/ParentAttendanceScr
 import { ParentResultsScreen } from './src/screens/parent/ParentResultsScreen';
 import { TeacherScreen } from './src/screens/TeacherScreen';
 import { TeacherAssessmentScreen } from './src/screens/teacher/TeacherAssessmentScreen';
+import { ReportCardDesignerScreen } from './src/screens/teacher/ReportCardDesignerScreen';
 import { StudentScreen } from './src/screens/StudentScreen';
 import { StudentCbtScreen } from './src/screens/student/StudentCbtScreen';
 import { NotificationCenterScreen } from './src/screens/NotificationCenterScreen';
@@ -100,6 +101,8 @@ function MainApp() {
       // Teacher Views
       case 'teacher_assessments':
         return <TeacherAssessmentScreen />;
+      case 'teacher_report_designer':
+        return <ReportCardDesignerScreen />;
       case 'teacher_timetable':
       case 'teacher_attendance':
       case 'teacher_roster':
