@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { apiClient, TimetablePeriod } from '../api/client';
+import { apiClient, TimetablePeriod, TeacherProfileData } from '../api/client';
 
 export const TeacherScreen: React.FC = () => {
+  const [profile, setProfile] = useState<TeacherProfileData | null>(null);
   const [periods, setPeriods] = useState<TimetablePeriod[]>([]);
   const [loading, setLoading] = useState(true);
   const [roster, setRoster] = useState([
@@ -13,14 +14,22 @@ export const TeacherScreen: React.FC = () => {
   ]);
 
   useEffect(() => {
-    loadTimetable();
+    loadData();
   }, []);
 
-  const loadTimetable = async () => {
+  const loadData = async () => {
     setLoading(true);
-    const res = await apiClient.getTeacherTimetable();
-    if (res.success && res.data && res.data.length > 0) {
-      setPeriods(res.data);
+    const [profileRes, timetableRes] = await Promise.all([
+      apiClient.getTeacherProfile(),
+      apiClient.getTeacherTimetable(),
+    ]);
+
+    if (profileRes.success && profileRes.data) {
+      setProfile(profileRes.data);
+    }
+
+    if (timetableRes.success && timetableRes.data && timetableRes.data.length > 0) {
+      setPeriods(timetableRes.data);
     } else {
       setPeriods([
         {
@@ -68,6 +77,57 @@ export const TeacherScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Staff Employment & Banking Profile Card */}
+      {profile && (
+        <View style={styles.profileCard}>
+          <View style={styles.profileHeader}>
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {profile.full_name
+                  .split(' ')
+                  .map(n => n[0])
+                  .join('')
+                  .substring(0, 2)
+                  .toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.profileMain}>
+              <View style={styles.nameRow}>
+                <Text style={styles.profileName}>{profile.full_name}</Text>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusBadgeText}>{profile.status.toUpperCase()}</Text>
+                </View>
+              </View>
+              <Text style={styles.profileDesignation}>
+                {profile.designation} • {profile.department}
+              </Text>
+              <Text style={styles.staffIdBadge}>ID: {profile.staff_id_number}</Text>
+            </View>
+          </View>
+
+          <View style={styles.profileDivider} />
+
+          <View style={styles.bankingSection}>
+            <View style={styles.bankingRow}>
+              <Text style={styles.bankingLabel}>Salary Account:</Text>
+              <Text style={styles.bankingVal}>
+                {profile.banking.bank_name} ({profile.banking.account_number_masked})
+              </Text>
+            </View>
+            <View style={styles.bankingRow}>
+              <Text style={styles.bankingLabel}>Pension PFA:</Text>
+              <Text style={styles.bankingVal}>{profile.banking.pension_pfa}</Text>
+            </View>
+            {profile.confirmation_date && (
+              <View style={styles.bankingRow}>
+                <Text style={styles.bankingLabel}>Confirmed:</Text>
+                <Text style={styles.bankingVal}>{profile.confirmation_date}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
+
       <Text style={styles.sectionTitle}>Today's Teaching Schedule</Text>
 
       {/* Period Cards */}
@@ -251,5 +311,86 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  profileCard: {
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    gap: 12,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#4F46E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  profileMain: {
+    flex: 1,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  profileName: {
+    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  statusBadge: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  statusBadgeText: {
+    color: '#10B981',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  profileDesignation: {
+    color: '#94A3B8',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  staffIdBadge: {
+    color: '#6366F1',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  profileDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  bankingSection: {
+    gap: 6,
+  },
+  bankingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bankingLabel: {
+    color: '#64748B',
+    fontSize: 12,
+  },
+  bankingVal: {
+    color: '#CBD5E1',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

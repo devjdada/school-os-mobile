@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiClient, ActiveExam } from '../api/client';
 
-export const StudentScreen: React.FC = () => {
+interface Props {
+  onNavigate?: (screenId: string, examId?: string) => void;
+}
+
+export const StudentScreen: React.FC<Props> = ({ onNavigate }) => {
   const [exams, setExams] = useState<ActiveExam[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,8 +70,11 @@ export const StudentScreen: React.FC = () => {
                 </Text>
               </View>
 
-              <TouchableOpacity style={styles.startBtn}>
-                <Text style={styles.startBtnText}>Launch CBT</Text>
+              <TouchableOpacity
+                style={styles.startBtn}
+                onPress={() => onNavigate && onNavigate('student_cbt', exam.id)}
+              >
+                <Text style={styles.startBtnText}>Launch CBT →</Text>
               </TouchableOpacity>
             </View>
           ))}

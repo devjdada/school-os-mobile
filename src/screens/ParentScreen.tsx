@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiClient, ChildProfile } from '../api/client';
 
-export const ParentScreen: React.FC = () => {
+interface Props {
+  onNavigate?: (screenId: string, studentId?: string) => void;
+}
+
+export const ParentScreen: React.FC<Props> = ({ onNavigate }) => {
   const [children, setChildren] = useState<ChildProfile[]>([]);
   const [selectedChildIndex, setSelectedChildIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -104,7 +108,11 @@ export const ParentScreen: React.FC = () => {
           </View>
 
           {/* Real-time Turnstile Gate Tap Banner */}
-          <View style={styles.gateAlertCard}>
+          <TouchableOpacity
+            style={styles.gateAlertCard}
+            onPress={() => onNavigate && onNavigate('parent_attendance', activeChild.id)}
+            activeOpacity={0.8}
+          >
             <View style={styles.gateHeader}>
               <Text style={styles.gateTitle}>Perimeter Gate Security Status</Text>
               <View style={styles.liveIndicator}>
@@ -119,15 +127,30 @@ export const ParentScreen: React.FC = () => {
                   ✓ Safely On Campus (Arrived {activeChild.gate_status.tapped_at})
                 </Text>
                 <Text style={styles.gateTerminal}>
-                  Sensor: {activeChild.gate_status.terminal}
+                  Sensor: {activeChild.gate_status.terminal} →
                 </Text>
               </View>
             ) : (
               <Text style={styles.gateStatusNeutral}>
-                No gate turnstile activity logged today.
+                No gate turnstile activity logged today. Tap for 30-day log →
               </Text>
             )}
-          </View>
+          </TouchableOpacity>
+
+          {/* Academic Report Card Quick Access */}
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() => onNavigate && onNavigate('parent_results', activeChild.id)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.metricTitle}>Terminal Academic Report Card</Text>
+            <Text style={[styles.metricValue, { color: '#38BDF8' }]}>
+              First Term Examination Transcript →
+            </Text>
+            <Text style={{ color: '#94A3B8', fontSize: 12, marginTop: 4 }}>
+              View continuous assessment breakdown, teacher remarks & class position
+            </Text>
+          </TouchableOpacity>
 
           {/* Canteen Wallet Card */}
           <View style={styles.metricCard}>
@@ -141,7 +164,11 @@ export const ParentScreen: React.FC = () => {
           </View>
 
           {/* Tuition Fee Card */}
-          <View style={styles.metricCard}>
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() => onNavigate && onNavigate('parent_invoices', activeChild.id)}
+            activeOpacity={0.8}
+          >
             <Text style={styles.metricTitle}>Tuition & Term Fee Balance</Text>
             <Text
               style={[
@@ -153,12 +180,13 @@ export const ParentScreen: React.FC = () => {
                 ? `₦${activeChild.fee_balance.toLocaleString('en-NG', { minimumFractionDigits: 2 })} Outstanding`
                 : '✓ Fully Cleared'}
             </Text>
-            {activeChild.fee_balance > 0 && (
-              <TouchableOpacity style={styles.payBtn}>
-                <Text style={styles.payBtnText}>Pay Balance Now</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+            <TouchableOpacity
+              style={styles.payBtn}
+              onPress={() => onNavigate && onNavigate('parent_invoices', activeChild.id)}
+            >
+              <Text style={styles.payBtnText}>View Itemized Breakdown & Pay →</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       )}
     </ScrollView>
