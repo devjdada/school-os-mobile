@@ -69,6 +69,13 @@ export const SideDrawer: React.FC<Props> = ({
     return null;
   }
 
+  const adminMenuItems = [
+    { id: 'admin_overview', label: 'Executive Dashboard', icon: '🏛️' },
+    { id: 'teacher_report_designer', label: 'Report Card Designer', icon: '🎨' },
+    { id: 'teacher_assessments', label: 'Academic Moderation', icon: '🎯' },
+    { id: 'notifications', label: 'Notifications & Broadcasts', icon: '🔔' },
+  ];
+
   const parentMenuItems = [
     { id: 'parent_overview', label: 'Children Overview', icon: '📊' },
     { id: 'parent_invoices', label: 'Fee Invoices & Pay', icon: '💳' },
@@ -81,6 +88,7 @@ export const SideDrawer: React.FC<Props> = ({
     { id: 'teacher_timetable', label: 'Teaching Schedule', icon: '⏱' },
     { id: 'teacher_attendance', label: 'Rapid Roll Call', icon: '📋' },
     { id: 'teacher_assessments', label: 'Continuous Assessment', icon: '🎯' },
+    { id: 'teacher_report_designer', label: 'Report Card Designer', icon: '🎨' },
     { id: 'teacher_roster', label: 'Class Arm Roster', icon: '👥' },
     { id: 'notifications', label: 'Notifications & Alerts', icon: '🔔' },
   ];
@@ -94,6 +102,8 @@ export const SideDrawer: React.FC<Props> = ({
 
   const getMenuItems = () => {
     switch (activeRole) {
+      case 'admin':
+        return adminMenuItems;
       case 'teacher':
         return teacherMenuItems;
       case 'student':
@@ -138,14 +148,24 @@ export const SideDrawer: React.FC<Props> = ({
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <View style={styles.brandRow}>
               <View style={[styles.brandBadge, { backgroundColor: colors.primary }]}>
-                <Text style={styles.brandBadgeText}>AH</Text>
+                <Text style={styles.brandBadgeText}>
+                  {user?.tenant?.name
+                    ? user.tenant.name
+                        .split(' ')
+                        .filter(Boolean)
+                        .map((w) => w[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : '🎓'}
+                </Text>
               </View>
               <View style={styles.brandTextContainer}>
                 <Text style={[styles.brandSchool, { color: colors.textPrimary }]}>
-                  {user?.tenant?.name || 'Atlantic Hall College'}
+                  {user?.tenant?.name || 'School OS'}
                 </Text>
                 <Text style={[styles.brandCampus, { color: colors.textMuted }]}>
-                  {tenantSubdomain}.schoolos.ng
+                  {user?.tenant?.subdomain ? `${user.tenant.subdomain}.schoolos.ng` : 'Educational Cloud'}
                 </Text>
               </View>
             </View>
@@ -212,45 +232,6 @@ export const SideDrawer: React.FC<Props> = ({
                 </TouchableOpacity>
               );
             })}
-
-            {/* Role Context Switcher */}
-            <Text style={[styles.sectionTitle, { color: colors.textMuted, marginTop: 20 }]}>
-              SWITCH PORTAL CONTEXT
-            </Text>
-            <View style={styles.roleSwitcherRow}>
-              {(['parent', 'teacher', 'student'] as RoleExperience[]).map((r) => (
-                <TouchableOpacity
-                  key={r}
-                  style={[
-                    styles.roleSwitchBtn,
-                    {
-                      borderColor: activeRole === r ? colors.primary : colors.border,
-                      backgroundColor: activeRole === r ? colors.primaryLight : 'transparent',
-                    },
-                  ]}
-                  onPress={() => {
-                    setActiveRole(r);
-                    onSelectScreen(
-                      r === 'parent'
-                        ? 'parent_overview'
-                        : r === 'teacher'
-                        ? 'teacher_timetable'
-                        : 'student_cbt'
-                    );
-                    onClose();
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.roleSwitchText,
-                      { color: activeRole === r ? colors.primary : colors.textSecondary },
-                    ]}
-                  >
-                    {r === 'parent' ? '👨‍👩‍👧 Parent' : r === 'teacher' ? '👩‍🏫 Teacher' : '🎓 Student'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
 
             {/* System / Preferences Section */}
             <Text style={[styles.sectionTitle, { color: colors.textMuted, marginTop: 20 }]}>

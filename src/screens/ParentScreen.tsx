@@ -21,37 +21,7 @@ export const ParentScreen: React.FC<Props> = ({ onNavigate }) => {
     if (res.success && res.data) {
       setChildren(res.data);
     } else {
-      // Mock fallback for standalone mobile preview
-      setChildren([
-        {
-          id: '1',
-          full_name: 'Chidi Emeka Okonkwo',
-          admission_number: 'AHC/2026/0001',
-          class_name: 'JSS 1 Gold',
-          gender: 'male',
-          gate_status: {
-            direction: 'in',
-            tapped_at: '07:48 AM',
-            terminal: 'East Perimeter Gate Turnstile 01',
-          },
-          fee_balance: 0.0,
-          wallet_balance: 12500.0,
-        },
-        {
-          id: '2',
-          full_name: 'Amina Zainab Danjuma',
-          admission_number: 'AHC/2026/0002',
-          class_name: 'SSS 1 Science A',
-          gender: 'female',
-          gate_status: {
-            direction: 'in',
-            tapped_at: '07:54 AM',
-            terminal: 'Main Gate Turnstile 02',
-          },
-          fee_balance: 45000.0,
-          wallet_balance: 8500.0,
-        },
-      ]);
+      setChildren([]);
     }
     setLoading(false);
   };
@@ -63,6 +33,20 @@ export const ParentScreen: React.FC<Props> = ({ onNavigate }) => {
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#059669" />
         <Text style={styles.loadingText}>Syncing Guardian Records...</Text>
+      </View>
+    );
+  }
+
+  if (children.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ fontSize: 44, marginBottom: 12 }}>👨‍👩‍👧</Text>
+        <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '700', marginBottom: 8, textAlign: 'center' }}>
+          No Linked Students Found
+        </Text>
+        <Text style={{ color: '#94A3B8', fontSize: 13, textAlign: 'center', maxWidth: 300, lineHeight: 18 }}>
+          No student profiles are currently linked to this guardian account. Please contact your school administrator to associate your wards.
+        </Text>
       </View>
     );
   }

@@ -30,27 +30,20 @@ export const TeacherScreen: React.FC = () => {
 
     if (timetableRes.success && timetableRes.data && timetableRes.data.length > 0) {
       setPeriods(timetableRes.data);
+      // Fetch roster for first class arm if available
+      const firstArmId = timetableRes.data[0].class_arm_id;
+      if (firstArmId) {
+        const rosterRes = await apiClient.getClassRoster(firstArmId);
+        if (rosterRes.success && rosterRes.data && rosterRes.data.length > 0) {
+          setRoster(rosterRes.data.map((s: any) => ({
+            id: String(s.id),
+            name: s.full_name || s.name,
+            status: 'present',
+          })));
+        }
+      }
     } else {
-      setPeriods([
-        {
-          id: '1',
-          period_number: 1,
-          subject_name: 'Mathematics',
-          class_name: 'JSS 1 Gold',
-          class_arm_id: 'arm-1',
-          time_slot: '08:00 - 08:45',
-          room: 'Room 101',
-        },
-        {
-          id: '2',
-          period_number: 2,
-          subject_name: 'Further Mathematics',
-          class_name: 'SSS 1 Science A',
-          class_arm_id: 'arm-2',
-          time_slot: '08:45 - 09:30',
-          room: 'Science Lab 2',
-        },
-      ]);
+      setPeriods([]);
     }
     setLoading(false);
   };
@@ -132,56 +125,76 @@ export const TeacherScreen: React.FC = () => {
 
       {/* Period Cards */}
       <View style={styles.periodList}>
-        {periods.map(p => (
-          <View key={p.id} style={styles.periodCard}>
-            <View style={styles.periodBadge}>
-              <Text style={styles.periodNum}>P{p.period_number}</Text>
-            </View>
-            <View style={styles.periodInfo}>
-              <Text style={styles.subjectName}>{p.subject_name}</Text>
-              <Text style={styles.periodMeta}>
-                {p.class_name} • {p.room} • {p.time_slot}
-              </Text>
-            </View>
+        {periods.length === 0 ? (
+          <View style={[styles.periodCard, { padding: 20, justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ color: '#94A3B8', fontSize: 13, textAlign: 'center' }}>
+              No scheduled teaching periods assigned for today.
+            </Text>
           </View>
-        ))}
+        ) : (
+          periods.map((p) => (
+            <View key={p.id} style={styles.periodCard}>
+              <View style={styles.periodBadge}>
+                <Text style={styles.periodNum}>P{p.period_number}</Text>
+              </View>
+              <View style={styles.periodInfo}>
+                <Text style={styles.subjectName}>{p.subject_name}</Text>
+                <Text style={styles.periodMeta}>
+                  {p.class_name} • {p.room} • {p.time_slot}
+                </Text>
+              </View>
+            </View>
+          ))
+        )}
       </View>
 
       {/* Rapid Attendance Roll Call */}
       <View style={styles.rosterCard}>
         <View style={styles.rosterHeader}>
-          <Text style={styles.rosterTitle}>Rapid Class Roll Call (JSS 1 Gold)</Text>
+          <Text style={styles.rosterTitle}>
+            Rapid Class Roll Call ({periods[0]?.class_name || 'Classroom'})
+          </Text>
           <Text style={styles.rosterCount}>
-            {roster.filter(r => r.status === 'present').length}/{roster.length} Present
+            {roster.filter((r) => r.status === 'present').length}/{roster.length} Present
           </Text>
         </View>
 
-        <View style={styles.studentGrid}>
-          {roster.map(student => (
-            <TouchableOpacity
-              key={student.id}
-              onPress={() => toggleStatus(student.id)}
-              style={[
-                styles.studentChip,
-                student.status === 'present' ? styles.chipPresent : styles.chipAbsent,
-              ]}
-            >
-              <Text
+        {roster.length === 0 ? (
+          <View style={{ padding: 16, alignItems: 'center' }}>
+            <Text style={{ color: '#94A3B8', fontSize: 13, textAlign: 'center' }}>
+              Roll call roster is currently empty for this period.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.studentGrid}>
+            {roster.map((student) => (
+              <TouchableOpacity
+                key={student.id}
+                onPress={() => toggleStatus(student.id)}
                 style={[
-                  styles.studentChipText,
-                  student.status === 'present' ? styles.textPresent : styles.textAbsent,
+                  styles.studentChip,
+                  student.status === 'present' ? styles.chipPresent : styles.chipAbsent,
                 ]}
               >
-                {student.status === 'present' ? '✓ ' : '✗ '}
-                {student.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Text
+                  style={[
+                    styles.studentChipText,
+                    student.status === 'present' ? styles.textPresent : styles.textAbsent,
+                  ]}
+                >
+                  {student.status === 'present' ? '✓ ' : '✗ '}
+                  {student.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-        <TouchableOpacity style={styles.saveBtn}>
-          <Text style={styles.saveBtnText}>Save Roll Call</Text>
-        </TouchableOpacity>
+        {roster.length > 0 && (
+          <TouchableOpacity style={styles.saveBtn}>
+            <Text style={styles.saveBtnText}>Save Roll Call</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );

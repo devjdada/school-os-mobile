@@ -16,6 +16,7 @@ import { TeacherAssessmentScreen } from './src/screens/teacher/TeacherAssessment
 import { ReportCardDesignerScreen } from './src/screens/teacher/ReportCardDesignerScreen';
 import { StudentScreen } from './src/screens/StudentScreen';
 import { StudentCbtScreen } from './src/screens/student/StudentCbtScreen';
+import { AdminScreen } from './src/screens/AdminScreen';
 import { NotificationCenterScreen } from './src/screens/NotificationCenterScreen';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { mobileAnalytics } from './src/services/analyticsService';
@@ -25,13 +26,20 @@ type AuthView = 'sign_in' | 'sign_up' | 'forgot_password';
 
 function MainApp() {
   const { colors, isDark } = useTheme();
-  const { isAuthenticated, activeRole } = useAuth();
+  const { isAuthenticated, activeRole, user } = useAuth();
 
   const [authView, setAuthView] = useState<AuthView>('sign_in');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeScreenId, setActiveScreenId] = useState<string>('parent_overview');
   const [activeStudentId, setActiveStudentId] = useState<string>('1');
   const [activeExamId, setActiveExamId] = useState<string>('1');
+
+  React.useEffect(() => {
+    if (activeRole === 'admin') setActiveScreenId('admin_overview');
+    else if (activeRole === 'teacher') setActiveScreenId('teacher_timetable');
+    else if (activeRole === 'student') setActiveScreenId('student_overview');
+    else setActiveScreenId('parent_overview');
+  }, [activeRole]);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -108,6 +116,13 @@ function MainApp() {
       case 'teacher_roster':
         return <TeacherScreen />;
 
+      // Admin Views
+      case 'admin_overview':
+      case 'admin_academics':
+      case 'admin_finances':
+      case 'admin_staff':
+        return <AdminScreen />;
+
       // Student Views
       case 'student_cbt':
         return (
@@ -119,13 +134,14 @@ function MainApp() {
       case 'notifications':
         return (
           <NotificationCenterScreen
-            onBack={() => setActiveScreenId(activeRole === 'teacher' ? 'teacher_timetable' : activeRole === 'student' ? 'student_cbt' : 'parent_overview')}
+            onBack={() => setActiveScreenId(activeRole === 'admin' ? 'admin_overview' : activeRole === 'teacher' ? 'teacher_timetable' : activeRole === 'student' ? 'student_cbt' : 'parent_overview')}
           />
         );
       case 'student_wallet':
       case 'student_notices':
       case 'student_overview':
       default:
+        if (activeRole === 'admin') return <AdminScreen />;
         if (activeRole === 'teacher') return <TeacherScreen />;
         if (activeRole === 'student') {
           return (
@@ -158,8 +174,8 @@ function MainApp() {
 
       {/* Dynamic Institutional Branding Header with Hamburger Menu */}
       <BrandingHeader
-        schoolName="Atlantic Hall College"
-        campusName="Lekki Main Campus"
+        schoolName={user?.tenant?.name}
+        campusName={user?.tenant ? 'Campus Portal' : undefined}
         onOpenDrawer={() => setDrawerOpen(true)}
       />
 

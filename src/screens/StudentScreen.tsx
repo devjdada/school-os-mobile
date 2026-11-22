@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiClient, ActiveExam } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 interface Props {
   onNavigate?: (screenId: string, examId?: string) => void;
 }
 
+interface Announcement {
+  id: number;
+  title: string;
+  date: string;
+  body: string;
+}
+
 export const StudentScreen: React.FC<Props> = ({ onNavigate }) => {
+  const { user } = useAuth();
   const [exams, setExams] = useState<ActiveExam[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,26 +26,21 @@ export const StudentScreen: React.FC<Props> = ({ onNavigate }) => {
 
   const loadDashboard = async () => {
     setLoading(true);
-    const res = await apiClient.getStudentDashboard();
-    if (res.success && res.data && res.data.active_exams) {
-      setExams(res.data.active_exams);
-    } else {
-      setExams([
-        {
-          id: '1',
-          title: 'Mathematics First Term Examination 2026',
-          duration_minutes: 60,
-          total_marks: 100,
-        },
-        {
-          id: '2',
-          title: 'Basic Science & Technology Assessment',
-          duration_minutes: 30,
-          total_marks: 40,
-        },
-      ]);
+    try {
+      const res = await apiClient.getStudentDashboard();
+      if (res.success && res.data) {
+        setExams(res.data.active_exams || []);
+        if (res.data.announcements && Array.isArray(res.data.announcements)) {
+          setAnnouncements(res.data.announcements);
+        }
+      } else {
+        setExams([]);
+      }
+    } catch {
+      setExams([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (loading) {
@@ -49,48 +54,66 @@ export const StudentScreen: React.FC<Props> = ({ onNavigate }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Canteen Wallet Card */}
-      <View style={styles.walletCard}>
-        <Text style={styles.walletLabel}>My Tuck Shop Wallet</Text>
-        <Text style={styles.walletBalance}>₦12,500.00</Text>
-        <Text style={styles.walletUid}>Smartcard UID: RFID-TOBI-99</Text>
+      {/* Student Profile Card */}
+      <View style={styles.profileCard}>
+        <Text style={styles.profileRole}>STUDENT PORTAL</Text>
+        <Text style={styles.profileName}>{user?.name || 'Enrolled Student'}</Text>
+        <Text style={styles.profileEmail}>{user?.email || 'student@school.edu'}</Text>
       </View>
 
       {/* Online Computer-Based Tests (CBT) */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Online Computer-Based Tests (CBT)</Text>
 
-        <View style={styles.examList}>
-          {exams.map(exam => (
-            <View key={exam.id} style={styles.examCard}>
-              <View>
-                <Text style={styles.examTitle}>{exam.title}</Text>
-                <Text style={styles.examMeta}>
-                  ⏱ {exam.duration_minutes} Mins • 🎯 {exam.total_marks} Marks
-                </Text>
-              </View>
+        {exams.length > 0 ? (
+          <View style={styles.examList}>
+            {exams.map(exam => (
+              <View key={exam.id} style={styles.examCard}>
+                <View style={styles.examInfo}>
+                  <Text style={styles.examTitle}>{exam.title}</Text>
+                  <Text style={styles.examMeta}>
+                    ⏱ {exam.duration_minutes} Mins • 🎯 Pass Mark: {exam.pass_mark || 50}%
+                  </Text>
+                </View>
 
-              <TouchableOpacity
-                style={styles.startBtn}
-                onPress={() => onNavigate && onNavigate('student_cbt', exam.id)}
-              >
-                <Text style={styles.startBtnText}>Launch CBT →</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
+                <TouchableOpacity
+                  style={styles.startBtn}
+                  onPress={() => onNavigate && onNavigate('student_cbt', exam.id)}
+                >
+                  <Text style={styles.startBtnText}>Launch CBT →</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No Active Examinations</Text>
+            <Text style={styles.emptySubtitle}>
+              There are currently no active computer-based assessments scheduled for your class arm.
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* Daily Homework & Announcements */}
+      {/* School Announcements */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>School Noticeboard</Text>
-        <View style={styles.noticeCard}>
-          <Text style={styles.noticeDate}>Today, 08:30 AM</Text>
-          <Text style={styles.noticeTitle}>Mid-Term Resumption & Sports Kit</Text>
-          <Text style={styles.noticeBody}>
-            Inter-house athletics heats will take place this Thursday. Please ensure your house jersey is ready.
-          </Text>
-        </View>
+        {announcements.length > 0 ? (
+          announcements.map(ann => (
+            <View key={ann.id} style={styles.noticeCard}>
+              <Text style={styles.noticeDate}>{ann.date}</Text>
+              <Text style={styles.noticeTitle}>{ann.title}</Text>
+              <Text style={styles.noticeBody}>{ann.body}</Text>
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No Announcements</Text>
+            <Text style={styles.emptySubtitle}>
+              Check back later for school notices and updates.
+            </Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -116,30 +139,29 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
   },
-  walletCard: {
+  profileCard: {
     backgroundColor: '#1E293B',
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#334155',
   },
-  walletLabel: {
-    color: '#94A3B8',
-    fontSize: 12,
-    textTransform: 'uppercase',
-    fontWeight: '700',
-  },
-  walletBalance: {
-    color: '#10B981',
-    fontSize: 28,
+  profileRole: {
+    color: '#3B82F6',
+    fontSize: 11,
     fontWeight: '800',
+    letterSpacing: 1,
+  },
+  profileName: {
+    color: '#F8FAFC',
+    fontSize: 20,
+    fontWeight: '700',
     marginTop: 4,
   },
-  walletUid: {
-    color: '#64748B',
-    fontSize: 12,
-    marginTop: 6,
-    fontFamily: 'monospace',
+  profileEmail: {
+    color: '#94A3B8',
+    fontSize: 13,
+    marginTop: 2,
   },
   section: {
     gap: 12,
@@ -156,16 +178,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E293B',
     padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#334155',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
   },
+  examInfo: {
+    flex: 1,
+  },
   examTitle: {
     color: '#F8FAFC',
     fontSize: 14,
     fontWeight: 'bold',
-    maxWidth: 200,
   },
   examMeta: {
     color: '#94A3B8',
@@ -187,6 +213,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E293B',
     padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#334155',
     gap: 6,
   },
   noticeDate: {
@@ -201,6 +229,26 @@ const styles = StyleSheet.create({
   noticeBody: {
     color: '#94A3B8',
     fontSize: 12,
+    lineHeight: 18,
+  },
+  emptyCard: {
+    backgroundColor: '#1E293B',
+    padding: 24,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#334155',
+    alignItems: 'center',
+    gap: 6,
+  },
+  emptyTitle: {
+    color: '#F8FAFC',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptySubtitle: {
+    color: '#64748B',
+    fontSize: 12,
+    textAlign: 'center',
     lineHeight: 18,
   },
 });

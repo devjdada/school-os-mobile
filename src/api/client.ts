@@ -381,14 +381,15 @@ export interface ActiveExam {
   id: string;
   title: string;
   duration_minutes: number;
-  total_marks: number;
+  total_marks?: number;
+  pass_mark?: number;
   status?: 'pending' | 'in_progress' | 'completed';
 }
 
 class MobileApiClient {
   private baseUrl: string = 'http://schos.test/api/v1';
   private authToken: string | null = null;
-  private tenantSubdomain: string = 'atlantichall';
+  private tenantSubdomain: string | null = null;
 
   public setToken(token: string | null) {
     this.authToken = token;
@@ -398,11 +399,11 @@ class MobileApiClient {
     return this.authToken;
   }
 
-  public setTenant(subdomain: string) {
+  public setTenant(subdomain: string | null) {
     this.tenantSubdomain = subdomain;
   }
 
-  public getTenant(): string {
+  public getTenant(): string | null {
     return this.tenantSubdomain;
   }
 
@@ -414,7 +415,7 @@ class MobileApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-Tenant': this.tenantSubdomain,
+      ...(this.tenantSubdomain ? { 'X-Tenant': this.tenantSubdomain } : {}),
       ...(this.authToken ? { 'Authorization': `Bearer ${this.authToken}` } : {}),
       ...(options.headers as Record<string, string> || {}),
     };
@@ -713,7 +714,7 @@ class MobileApiClient {
 
   // --- Student Endpoints ---
   public async getStudentDashboard() {
-    return this.request<{ active_exams: ActiveExam[] }>('/mobile/student/dashboard');
+    return this.request<{ active_exams: ActiveExam[]; announcements?: { id: number; title: string; date: string; body: string }[] }>('/mobile/student/dashboard');
   }
 
   public async startExam(examId: string) {
@@ -727,6 +728,28 @@ class MobileApiClient {
       method: 'POST',
       body: JSON.stringify({ answers }),
     });
+  }
+
+  // --- Admin Endpoints ---
+  public async getAdminOverview() {
+    return this.request<{
+      kpis: {
+        total_students: string;
+        active_learners_change: string;
+        faculty_on_duty: string;
+        faculty_rate: string;
+        attendance_rate: string;
+        gate_checkins: string;
+        term_fees_collected: string;
+        collection_rate: string;
+        total_collected: string;
+        outstanding_fees: string;
+        reconciliation_rate: string;
+        published_reports: string;
+        moderated_arms: string;
+      };
+      recent_events: { id: string; title: string; time: string; type: string }[];
+    }>('/mobile/admin/overview');
   }
 
   // --- Push Notifications & Devices ---

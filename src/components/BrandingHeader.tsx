@@ -11,13 +11,23 @@ interface Props {
 
 export const BrandingHeader: React.FC<Props> = ({
   schoolName,
-  campusName = 'Main Campus, Lekki',
+  campusName,
   onOpenDrawer,
 }) => {
   const { colors, isDark, toggleTheme } = useTheme();
   const { user } = useAuth();
 
-  const displayName = schoolName || user?.tenant?.name || 'Atlantic Hall College';
+  const displayName = schoolName || user?.tenant?.name || 'School OS';
+  const campusSubtitle = campusName || (user?.tenant ? 'Campus Portal' : 'Educational Cloud');
+  const badgeInitials = user?.tenant?.name
+    ? user.tenant.name
+        .split(' ')
+        .filter(Boolean)
+        .map((w) => w[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : '🎓';
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
@@ -34,7 +44,7 @@ export const BrandingHeader: React.FC<Props> = ({
 
       {/* School Crest Badge */}
       <View style={[styles.logoBadge, { backgroundColor: colors.primary }]}>
-        <Text style={styles.logoText}>AH</Text>
+        <Text style={styles.logoText}>{badgeInitials}</Text>
       </View>
 
       {/* School & Campus Name */}
@@ -43,7 +53,7 @@ export const BrandingHeader: React.FC<Props> = ({
           {displayName}
         </Text>
         <Text style={[styles.campusName, { color: colors.textMuted }]} numberOfLines={1}>
-          {campusName}
+          {campusSubtitle}
         </Text>
       </View>
 
