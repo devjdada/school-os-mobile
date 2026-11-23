@@ -387,7 +387,7 @@ export interface ActiveExam {
 }
 
 class MobileApiClient {
-  private baseUrl: string = 'http://schos.test/api/v1';
+  private baseUrl: string = 'https://schos.wchapel.com/api/v1';
   private authToken: string | null = null;
   private tenantSubdomain: string | null = null;
 
