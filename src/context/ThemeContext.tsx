@@ -10,6 +10,7 @@ export interface ThemeColors {
   surfaceMuted: string;
   border: string;
   borderLight: string;
+  text: string;
   textPrimary: string;
   textSecondary: string;
   textMuted: string;
@@ -35,6 +36,7 @@ export const lightColors: ThemeColors = {
   surfaceMuted: '#E2E8F0',
   border: '#E2E8F0',
   borderLight: '#F1F5F9',
+  text: '#0F172A',
   textPrimary: '#0F172A',
   textSecondary: '#475569',
   textMuted: '#94A3B8',
@@ -60,6 +62,7 @@ export const darkColors: ThemeColors = {
   surfaceMuted: '#0F172A',
   border: '#334155',
   borderLight: '#1E293B',
+  text: '#F8FAFC',
   textPrimary: '#F8FAFC',
   textSecondary: '#94A3B8',
   textMuted: '#64748B',

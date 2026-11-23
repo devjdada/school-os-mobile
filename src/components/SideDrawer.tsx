@@ -71,6 +71,8 @@ export const SideDrawer: React.FC<Props> = ({
 
   const adminMenuItems = [
     { id: 'admin_overview', label: 'Executive Dashboard', icon: '🏛️' },
+    { id: 'profile_school', label: 'School Profile & Code', icon: '🏫' },
+    { id: 'profile_unified', label: 'Profile Hub', icon: '👤' },
     { id: 'teacher_report_designer', label: 'Report Card Designer', icon: '🎨' },
     { id: 'teacher_assessments', label: 'Academic Moderation', icon: '🎯' },
     { id: 'notifications', label: 'Notifications & Broadcasts', icon: '🔔' },
@@ -78,6 +80,7 @@ export const SideDrawer: React.FC<Props> = ({
 
   const parentMenuItems = [
     { id: 'parent_overview', label: 'Children Overview', icon: '📊' },
+    { id: 'profile_parent', label: 'Family Profile & Code', icon: '👨‍👩‍👧' },
     { id: 'parent_invoices', label: 'Fee Invoices & Pay', icon: '💳' },
     { id: 'parent_attendance', label: 'Gate & Attendance', icon: '📅' },
     { id: 'parent_results', label: 'Terminal Reports', icon: '📝' },
@@ -86,6 +89,7 @@ export const SideDrawer: React.FC<Props> = ({
 
   const teacherMenuItems = [
     { id: 'teacher_timetable', label: 'Teaching Schedule', icon: '⏱' },
+    { id: 'profile_teacher', label: 'Staff Profile & Code', icon: '🎓' },
     { id: 'teacher_attendance', label: 'Rapid Roll Call', icon: '📋' },
     { id: 'teacher_assessments', label: 'Continuous Assessment', icon: '🎯' },
     { id: 'teacher_report_designer', label: 'Report Card Designer', icon: '🎨' },
@@ -95,6 +99,7 @@ export const SideDrawer: React.FC<Props> = ({
 
   const studentMenuItems = [
     { id: 'student_cbt', label: 'CBT Online Exams', icon: '🎓' },
+    { id: 'profile_student', label: 'Student Profile & Code', icon: '🎒' },
     { id: 'student_wallet', label: 'Tuck Shop Wallet', icon: '🛍' },
     { id: 'student_notices', label: 'Noticeboard', icon: '📢' },
     { id: 'notifications', label: 'Notifications & Alerts', icon: '🔔' },

@@ -18,6 +18,11 @@ import { StudentScreen } from './src/screens/StudentScreen';
 import { StudentCbtScreen } from './src/screens/student/StudentCbtScreen';
 import { AdminScreen } from './src/screens/AdminScreen';
 import { NotificationCenterScreen } from './src/screens/NotificationCenterScreen';
+import { SchoolProfileScreen } from './src/screens/profile/SchoolProfileScreen';
+import { TeacherProfileScreen } from './src/screens/profile/TeacherProfileScreen';
+import { ParentProfileScreen } from './src/screens/profile/ParentProfileScreen';
+import { StudentProfileScreen } from './src/screens/profile/StudentProfileScreen';
+import { UnifiedProfileScreen } from './src/screens/profile/UnifiedProfileScreen';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { mobileAnalytics } from './src/services/analyticsService';
 import { crashlytics } from './src/services/crashlyticsService';
@@ -114,14 +119,48 @@ function MainApp() {
       case 'teacher_timetable':
       case 'teacher_attendance':
       case 'teacher_roster':
-        return <TeacherScreen />;
+        return <TeacherScreen onNavigate={(screenId) => setActiveScreenId(screenId)} />;
 
       // Admin Views
       case 'admin_overview':
       case 'admin_academics':
       case 'admin_finances':
       case 'admin_staff':
-        return <AdminScreen />;
+        return <AdminScreen onNavigate={(screenId) => setActiveScreenId(screenId)} />;
+
+      // Profile Views
+      case 'profile_school':
+        return <SchoolProfileScreen onBack={() => setActiveScreenId('admin_overview')} />;
+      case 'profile_teacher':
+        return <TeacherProfileScreen onBack={() => setActiveScreenId('teacher_timetable')} />;
+      case 'profile_parent':
+        return (
+          <ParentProfileScreen
+            onBack={() => setActiveScreenId('parent_overview')}
+            onSelectStudent={(studentId) => {
+              setActiveStudentId(studentId);
+              setActiveScreenId('profile_student');
+            }}
+          />
+        );
+      case 'profile_student':
+        return (
+          <StudentProfileScreen
+            studentId={activeStudentId}
+            onBack={() => setActiveScreenId(activeRole === 'parent' ? 'profile_parent' : 'student_overview')}
+          />
+        );
+      case 'profile_unified':
+        return (
+          <UnifiedProfileScreen
+            onBack={() => {
+              if (activeRole === 'admin') setActiveScreenId('admin_overview');
+              else if (activeRole === 'teacher') setActiveScreenId('teacher_timetable');
+              else if (activeRole === 'student') setActiveScreenId('student_overview');
+              else setActiveScreenId('parent_overview');
+            }}
+          />
+        );
 
       // Student Views
       case 'student_cbt':

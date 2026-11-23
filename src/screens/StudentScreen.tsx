@@ -59,6 +59,12 @@ export const StudentScreen: React.FC<Props> = ({ onNavigate }) => {
         <Text style={styles.profileRole}>STUDENT PORTAL</Text>
         <Text style={styles.profileName}>{user?.name || 'Enrolled Student'}</Text>
         <Text style={styles.profileEmail}>{user?.email || 'student@school.edu'}</Text>
+        <TouchableOpacity
+          style={styles.profileCodeBtn}
+          onPress={() => onNavigate?.('profile_student')}
+        >
+          <Text style={styles.profileCodeBtnText}>🎒 View Student Profile & Admission Code →</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Online Computer-Based Tests (CBT) */}
@@ -250,5 +256,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  profileCodeBtn: {
+    backgroundColor: '#3B82F620',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#3B82F650',
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  profileCodeBtnText: {
+    color: '#60A5FA',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

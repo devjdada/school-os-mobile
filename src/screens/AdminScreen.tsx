@@ -11,7 +11,11 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 
-export const AdminScreen: React.FC = () => {
+interface Props {
+  onNavigate?: (screenId: string) => void;
+}
+
+export const AdminScreen: React.FC<Props> = ({ onNavigate }) => {
   const { colors } = useTheme();
   const { user } = useAuth();
 
@@ -88,6 +92,14 @@ export const AdminScreen: React.FC = () => {
             <Text style={[styles.statusBadgeText, { color: colors.primary }]}>ACTIVE TERM</Text>
           </View>
         </View>
+
+        {/* Quick Profile Code Access */}
+        <TouchableOpacity
+          style={styles.profileBannerBtn}
+          onPress={() => onNavigate?.('profile_school')}
+        >
+          <Text style={styles.profileBannerText}>🏫 View School Profile & Institution Code →</Text>
+        </TouchableOpacity>
 
         {/* Executive Tab Filter */}
         <View style={styles.tabRow}>
@@ -396,5 +408,21 @@ const styles = StyleSheet.create({
   eventTime: {
     fontSize: 11,
     marginTop: 2,
+  },
+  profileBannerBtn: {
+    backgroundColor: '#05966918',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#05966950',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 10,
+    marginBottom: 4,
+    alignItems: 'center',
+  },
+  profileBannerText: {
+    color: '#059669',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

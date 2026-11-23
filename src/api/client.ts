@@ -822,6 +822,31 @@ class MobileApiClient {
       body: JSON.stringify(prefs),
     });
   }
+
+  // --- Profile Endpoints & Institutional Codes ---
+  public async getSchoolProfile() {
+    return this.request<SchoolProfileData>('/mobile/profile/school');
+  }
+
+  public async getTeacherProfileFull() {
+    return this.request<TeacherProfileDataFull>('/mobile/profile/teacher');
+  }
+
+  public async getParentProfile() {
+    return this.request<ParentProfileData>('/mobile/profile/parent');
+  }
+
+  public async getStudentProfile(studentId?: string) {
+    const url = studentId
+      ? `/mobile/profile/student?student_id=${encodeURIComponent(studentId)}`
+      : '/mobile/profile/student';
+    return this.request<StudentProfileData>(url);
+  }
+
+  public async getUnifiedProfile(role?: string) {
+    const url = role ? `/mobile/profile?role=${encodeURIComponent(role)}` : '/mobile/profile';
+    return this.request<any>(url);
+  }
 }
 
 export interface AppNotificationItem {
@@ -872,6 +897,144 @@ export interface ScannedAssetResult {
     purchase_cost: number;
     current_book_value: number;
   } | null;
+}
+
+export interface EcosystemAppItem {
+  id: string;
+  name: string;
+  short_name: string;
+  category: string;
+  platform: string;
+  version: string;
+  file_size: string;
+  filename: string;
+  download_url: string;
+  icon: string;
+  badge: string;
+  color?: string;
+  description: string;
+  features: string[];
+  target_roles: string[];
+}
+
+export interface SchoolProfileData {
+  school: {
+    id: string;
+    name: string;
+    code: string;
+    campus_type: string;
+    address: string;
+    phone: string;
+    email: string;
+    principal_name: string;
+    is_active: boolean;
+  };
+  tenant: {
+    id: string;
+    name: string;
+    subdomain: string;
+    domain: string;
+  };
+  stats: {
+    total_students: number;
+    total_staff: number;
+    total_classes: number;
+    current_session: string;
+    current_term: string;
+  };
+  ecosystem_apps: EcosystemAppItem[];
+}
+
+export interface TeacherProfileDataFull {
+  staff: {
+    id: string;
+    staff_id_number: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    gender: string;
+    role_type: string;
+    designation: string;
+    department: string;
+    qualification: string;
+    employment_type: string;
+    status: string;
+    joined_at: string;
+  };
+  form_classes: { id: string; class_name: string }[];
+  subject_allocations: {
+    id: string;
+    class_name: string;
+    subject_name: string;
+    subject_code: string;
+    periods_per_week: number;
+  }[];
+  ecosystem_apps: EcosystemAppItem[];
+}
+
+export interface ParentProfileData {
+  guardian: {
+    id: string;
+    full_name: string;
+    title: string;
+    relationship: string;
+    phone_primary: string;
+    phone_secondary?: string | null;
+    email: string;
+    address: string;
+    occupation: string;
+  };
+  children: {
+    id: string;
+    admission_number: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    gender: string;
+    class_name: string;
+    house_name: string;
+    status: string;
+    attendance_rate: number;
+  }[];
+  total_outstanding: number;
+  ecosystem_apps: EcosystemAppItem[];
+}
+
+export interface StudentProfileData {
+  student: {
+    id: string;
+    admission_number: string;
+    full_name: string;
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+    gender: string;
+    dob: string;
+    class_name: string;
+    house_name: string;
+    nationality: string;
+    state_of_origin: string;
+    status: string;
+    attendance_rate: number;
+  };
+  guardians: {
+    id: string;
+    full_name: string;
+    relationship: string;
+    phone: string;
+    email: string;
+    is_primary: boolean;
+    can_pickup: boolean;
+  }[];
+  medical: {
+    blood_group: string;
+    genotype: string;
+    allergies: string;
+    emergency_contact: string;
+  };
+  ecosystem_apps: EcosystemAppItem[];
 }
 
 export const apiClient = new MobileApiClient();

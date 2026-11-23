@@ -53,27 +53,35 @@ export const ParentScreen: React.FC<Props> = ({ onNavigate }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Child Switcher Pills */}
+      {/* Child Switcher Pills & Family Profile Code Button */}
       <View style={styles.switcherContainer}>
-        {children.map((child, idx) => (
-          <TouchableOpacity
-            key={child.id}
-            onPress={() => setSelectedChildIndex(idx)}
-            style={[
-              styles.childPill,
-              selectedChildIndex === idx && styles.childPillActive,
-            ]}
-          >
-            <Text
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
+          {children.map((child, idx) => (
+            <TouchableOpacity
+              key={child.id}
+              onPress={() => setSelectedChildIndex(idx)}
               style={[
-                styles.childPillText,
-                selectedChildIndex === idx && styles.childPillTextActive,
+                styles.childPill,
+                selectedChildIndex === idx && styles.childPillActive,
               ]}
             >
-              {child.full_name.split(' ')[0]}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.childPillText,
+                  selectedChildIndex === idx && styles.childPillTextActive,
+                ]}
+              >
+                {child.full_name.split(' ')[0]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <TouchableOpacity
+          style={styles.familyProfileBtn}
+          onPress={() => onNavigate?.('profile_parent')}
+        >
+          <Text style={styles.familyProfileBtnText}>👨‍👩‍👧 Code →</Text>
+        </TouchableOpacity>
       </View>
 
       {activeChild && (
@@ -349,5 +357,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 13,
+  },
+  familyProfileBtn: {
+    backgroundColor: '#2563EB20',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2563EB50',
+    marginLeft: 8,
+    alignSelf: 'center',
+  },
+  familyProfileBtnText: {
+    color: '#3B82F6',
+    fontWeight: '700',
+    fontSize: 12,
   },
 });

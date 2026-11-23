@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiClient, TimetablePeriod, TeacherProfileData } from '../api/client';
 
-export const TeacherScreen: React.FC = () => {
+interface Props {
+  onNavigate?: (screenId: string) => void;
+}
+
+export const TeacherScreen: React.FC<Props> = ({ onNavigate }) => {
   const [profile, setProfile] = useState<TeacherProfileData | null>(null);
   const [periods, setPeriods] = useState<TimetablePeriod[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +98,12 @@ export const TeacherScreen: React.FC = () => {
               <Text style={styles.profileDesignation}>
                 {profile.designation} • {profile.department}
               </Text>
-              <Text style={styles.staffIdBadge}>ID: {profile.staff_id_number}</Text>
+              <TouchableOpacity
+                onPress={() => onNavigate?.('profile_teacher')}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                <Text style={styles.staffIdBadge}>ID: {profile.staff_id_number} (View Code →)</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
