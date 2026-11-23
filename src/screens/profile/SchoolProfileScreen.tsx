@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Linking,
   Alert,
+  Image,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { apiClient, SchoolProfileData } from '../../api/client';
@@ -136,7 +137,11 @@ export const SchoolProfileScreen: React.FC<Props> = ({ onBack }) => {
       <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.schoolHeaderRow}>
           <View style={styles.crestContainer}>
-            <Text style={styles.crestText}>🏫</Text>
+            {school?.logo_url ? (
+              <Image source={{ uri: school.logo_url }} style={styles.crestImage} resizeMode="contain" />
+            ) : (
+              <Text style={styles.crestText}>🏫</Text>
+            )}
           </View>
           <View style={styles.schoolTitleContainer}>
             <Text style={[styles.schoolName, { color: colors.text }]}>{school?.name}</Text>
@@ -293,6 +298,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
+    overflow: 'hidden',
+  },
+  crestImage: {
+    width: 54,
+    height: 54,
   },
   crestText: { fontSize: 26 },
   schoolTitleContainer: { flex: 1 },

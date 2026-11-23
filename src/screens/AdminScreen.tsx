@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -83,10 +84,17 @@ export const AdminScreen: React.FC<Props> = ({ onNavigate }) => {
       {/* Executive Welcome Banner */}
       <View style={[styles.welcomeBanner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.bannerRow}>
+          {user?.tenant?.logo_url && (
+            <Image
+              source={{ uri: user.tenant.logo_url }}
+              style={styles.schoolHeaderLogo}
+              resizeMode="contain"
+            />
+          )}
           <View style={styles.bannerText}>
             <Text style={[styles.greeting, { color: colors.textSecondary }]}>Executive Oversight</Text>
             <Text style={[styles.adminName, { color: colors.textPrimary }]}>{user?.name || 'Administrator'}</Text>
-            <Text style={[styles.schoolTitle, { color: colors.primary }]}>School Principal & Administrator</Text>
+            <Text style={[styles.schoolTitle, { color: colors.primary }]}>{user?.tenant?.name || 'School Principal & Administrator'}</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: colors.primaryLight }]}>
             <Text style={[styles.statusBadgeText, { color: colors.primary }]}>ACTIVE TERM</Text>
@@ -233,8 +241,14 @@ const styles = StyleSheet.create({
   bannerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 16,
+  },
+  schoolHeaderLogo: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    marginRight: 12,
   },
   bannerText: {
     flex: 1,

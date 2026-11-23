@@ -27,6 +27,7 @@ export interface AuthUser {
     id: string;
     name: string;
     subdomain: string;
+    logo_url?: string | null;
   } | null;
 }
 
@@ -927,6 +928,7 @@ export interface SchoolProfileData {
     phone: string;
     email: string;
     principal_name: string;
+    logo_url?: string | null;
     is_active: boolean;
   };
   tenant: {
@@ -934,6 +936,7 @@ export interface SchoolProfileData {
     name: string;
     subdomain: string;
     domain: string;
+    logo_url?: string | null;
   };
   stats: {
     total_students: number;
@@ -946,6 +949,7 @@ export interface SchoolProfileData {
 }
 
 export interface TeacherProfileDataFull {
+  school_logo_url?: string | null;
   staff: {
     id: string;
     staff_id_number: string;
@@ -975,6 +979,7 @@ export interface TeacherProfileDataFull {
 }
 
 export interface ParentProfileData {
+  school_logo_url?: string | null;
   guardian: {
     id: string;
     full_name: string;
@@ -1003,6 +1008,7 @@ export interface ParentProfileData {
 }
 
 export interface StudentProfileData {
+  school_logo_url?: string | null;
   student: {
     id: string;
     admission_number: string;

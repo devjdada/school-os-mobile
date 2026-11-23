@@ -9,6 +9,7 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth, RoleExperience } from '../context/AuthContext';
@@ -152,18 +153,26 @@ export const SideDrawer: React.FC<Props> = ({
           {/* Drawer Top Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <View style={styles.brandRow}>
-              <View style={[styles.brandBadge, { backgroundColor: colors.primary }]}>
-                <Text style={styles.brandBadgeText}>
-                  {user?.tenant?.name
-                    ? user.tenant.name
-                        .split(' ')
-                        .filter(Boolean)
-                        .map((w) => w[0])
-                        .join('')
-                        .slice(0, 2)
-                        .toUpperCase()
-                    : '🎓'}
-                </Text>
+              <View style={[styles.brandBadge, { backgroundColor: colors.primary, overflow: 'hidden' }]}>
+                {user?.tenant?.logo_url ? (
+                  <Image
+                    source={{ uri: user.tenant.logo_url }}
+                    style={styles.brandLogo}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Text style={styles.brandBadgeText}>
+                    {user?.tenant?.name
+                      ? user.tenant.name
+                          .split(' ')
+                          .filter(Boolean)
+                          .map((w) => w[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()
+                      : '🎓'}
+                  </Text>
+                )}
               </View>
               <View style={styles.brandTextContainer}>
                 <Text style={[styles.brandSchool, { color: colors.textPrimary }]}>
@@ -307,6 +316,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
+  },
+  brandLogo: {
+    width: 36,
+    height: 36,
   },
   brandBadgeText: {
     color: '#FFFFFF',
